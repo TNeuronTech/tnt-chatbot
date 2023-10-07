@@ -36,6 +36,8 @@ layout, sidebar, utils = Layout(), Sidebar(), Utilities()
 layout.show_header("PDF, TXT, CSV")
 
 user_api_key = utils.load_api_key()
+# Configure the sidebar
+sidebar.about()
 
 if not user_api_key:
     layout.show_api_key_missing()
@@ -57,11 +59,7 @@ else:
             print(f"Session id: {st.session_state['session_id']}")
         st.session_state["ready"] = True
 
-        # Configure the sidebar
-        sidebar.show_options()
-        sidebar.about()
-
-        
+    
         # Initialize chat history
         history = ChatHistory()
         try:

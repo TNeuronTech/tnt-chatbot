@@ -33,6 +33,7 @@ layout.show_header("CSV, Excel")
 user_api_key = utils.load_api_key()
 os.environ["OPENAI_API_KEY"] = user_api_key
 
+sidebar.about()
 
 if not user_api_key:
     layout.show_api_key_missing()
@@ -43,7 +44,6 @@ else:
     uploaded_file, data_type = utils.handle_upload(["csv", "xlsx"])
 
     if uploaded_file:
-        sidebar.about()
         
         uploaded_file_content = BytesIO(uploaded_file.getvalue())
         if uploaded_file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" or uploaded_file.type == "application/vnd.ms-excel":
