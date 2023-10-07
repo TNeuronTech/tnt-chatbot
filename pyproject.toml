@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tntchatbot"
+authors = [
+    {name = "tntchatbot", email = "tneurontech@gmail.com"},
+]
+description = "Chatbot based on text, PDF, CSV and video"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11"
+]
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+version = {file = ["version.txt"]}
+dependencies = {file = ["requirements.txt"]}
