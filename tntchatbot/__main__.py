@@ -13,12 +13,6 @@ from tntchatbot.router import modelrouter
 import os
 
 
-# add end points
-# package and deploy BE to server and query from internet
-# how to optimize the results
-
-
-
 app = FastAPI(
     title="tntchatbot",
     description="APIs for chatbot",
