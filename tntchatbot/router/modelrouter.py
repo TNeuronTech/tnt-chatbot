@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter, status, File, UploadFile, Header
+from fastapi.responses import JSONResponse
 
 from tntchatbot.schemas import schema
 from tntchatbot.api import api
@@ -15,19 +16,34 @@ router = APIRouter(tags=["AI-Model"], prefix="/model")
 @router.post("/predict", status_code=status.HTTP_200_OK, response_model=schema.PredictResp)
 async def predict(request: schema.PredictReq, AI_API_KEY: str = Header()):
     #logger.debug(f"/predict request {AI_API_KEY}")
-    response = api.query_model(request, AI_API_KEY)
-    logger.debug(f"/predict response {response}")
-    return response
+    try:
+        response = api.query_model(request, AI_API_KEY)
+        logger.debug(f"/predict response {response}")
+        return response
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"{str(e)}"})
 
 @router.post("/train", status_code=status.HTTP_201_CREATED, response_model=schema.TrainResp)
 async def train(request: schema.TrainReq, AI_API_KEY: str = Header()):
-    logger.debug(f"/train request {request}")
-    response = api.train_model(request, AI_API_KEY)
-    logger.debug(f"/train response {response}")
-    return response
+    try:
+        logger.debug(f"/train request {request}")
+        response = api.train_model(request, AI_API_KEY)
+        logger.debug(f"/train response {response}")
+        return response
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"{str(e)}"})
 
 @router.post("/sheet/predict", status_code=status.HTTP_200_OK, response_model=schema.PredictSheetResp)
 async def predict(request: schema.PredictSheetReq, AI_API_KEY: str = Header()):
-    response = api.query_sheet_model(request, AI_API_KEY)
-    logger.debug(f"/sheet/predict response {response}")
-    return response
+    try:
+        response = api.query_sheet_model(request, AI_API_KEY)
+        logger.debug(f"/sheet/predict response {response}")
+        return response
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"{str(e)}"})
