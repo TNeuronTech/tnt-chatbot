@@ -13,12 +13,14 @@ class DataType(int, Enum):
     def getDataType(datatype: str):
         if datatype in ['pdf', '.pdf']:
             return DataType.PDF
-        if datatype in ['txt', '.txt', 'text']:
+        elif datatype in ['txt', '.txt', 'text']:
             return DataType.TEXT
-        if datatype in ['csv', '.csv']:
+        elif datatype in ['csv', '.csv']:
             return DataType.CSV
-        if datatype in ['xlsx',  '.xlsx', 'xls', '.xls']:
+        elif datatype in ['xlsx',  '.xlsx', 'xls', '.xls']:
             return DataType.EXCEL
+        else:
+            return None
         
 
 class Utilities:
@@ -90,7 +92,6 @@ class Utilities:
             # Show the contents of the file based on its extension
             if file_extension== ".pdf" : 
                 show_pdf_file(uploaded_file)
-                data_type  = DataType.getDataType(file_extension)
             elif file_extension== ".txt" : 
                 show_txt_file(uploaded_file)
             
