@@ -23,9 +23,11 @@ class PredictSheetReq(BaseModel):
 
 class PredictSheetResp(BaseModel):
     result: str
+    agent_thoughts: str
 
 class PredictResp(BaseModel):
     result: str
+    agent_thoughts: str
 
 class TrainReq(BaseModel):    
     data: str

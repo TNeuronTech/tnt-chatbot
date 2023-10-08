@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+import sys
+from io import StringIO
 
 from langchain.llms import OpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -22,6 +24,7 @@ from pandasai.schemas.df_config import Config
 
 from tntchatbot.config.settings import settings
 from tntchatbot.logger.logger import logger
+from tntchatbot.utils import common
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
@@ -36,7 +39,8 @@ class Model:
             persist_directory=f"{settings.DB_LOCATION}/{session_id}", 
             embedding_function=OpenAIEmbeddings(openai_api_key=AI_API_KEY))
         
-        # self.retrieval = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=OPENAI_API_KEY), chain_type="stuff", retriever=index.as_retriever())
+        old_stdout = sys.stdout
+        sys.stdout = captured_output = StringIO()
 
         chain = ConversationalRetrievalChain.from_llm(
             llm=ChatOpenAI(
@@ -50,10 +54,13 @@ class Model:
             combine_docs_chain_kwargs={'prompt': PromptTemplate(template=settings.QA_TEMPLATE, input_variables=["context","question" ])})
         
         chain_input = {"question": prompt, "chat_history": history}
-        # chain_input = {"question": prompt, "chat_history": []}
         response = chain(chain_input)
-        logger.debug("api response {response}")
-        return response['answer']
+
+        sys.stdout = old_stdout
+
+        agent_thoughts = common.agent_thought_cleanup(captured_output)
+
+        return response['answer'], agent_thoughts
 
     def train_and_get_key(self, AI_API_KEY, key, data):
         
@@ -79,14 +86,21 @@ class Model:
         texts = self.textSplitter.split_text(finalString)
         logger.debug(f"Video transcript {texts}")
         
+        old_stdout = sys.stdout
+        sys.stdout = captured_output = StringIO()
+
         summary_chain = load_summarize_chain(OpenAI(temperature=settings.TEMPERATURE, openai_api_key=AI_API_KEY),
                                             chain_type="map_reduce",verbose=True)
             
         summarize_document_chain = AnalyzeDocumentChain(combine_docs_chain=summary_chain)
 
-        answer = summarize_document_chain.run(texts[0])
-        logger.debug(f"api response {answer}")
-        return answer
+        response = summarize_document_chain.run(texts[0])
+
+        sys.stdout = old_stdout
+
+        agent_thoughts = common.agent_thought_cleanup(captured_output)
+
+        return response, agent_thoughts
         
     def get_sheet_query_results(self, AI_API_KEY, df, prompt) -> str:
         
@@ -106,12 +120,16 @@ class Model:
                     ),
                 save_logs=False))
         
-        answer = str(smartDataframe.chat(query=prompt))
+        old_stdout = sys.stdout
+        sys.stdout = captured_output = StringIO()
+
+        response = str(smartDataframe.chat(query=prompt))
+
+        sys.stdout = old_stdout
+
+        agent_thoughts = common.agent_thought_cleanup(captured_output)
         
-        # logger.debug(f"type of response {type(answer)}")
-        
-        logger.debug(f"api response {answer}")
-        return answer
+        return response, agent_thoughts
 
     def train_chat_sheet_and_get_key(self, AI_API_KEY, key, data):
             

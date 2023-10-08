@@ -25,11 +25,17 @@ def query_model(request: schema.PredictReq, AI_API_KEY):
     
     if(request.data_type in [DataType.VIDEO]):
         logger.debug("video file format")
-        return {"result": ai_model.get_video_query_results(AI_API_KEY, request.prompt)}
+        output, agent_thoughts = ai_model.get_video_query_results(AI_API_KEY, request.prompt)
+        return {
+            "result": output,
+            "agent_thoughts": agent_thoughts}
 
     elif(request.data_type in [DataType.PDF, DataType.CSV, DataType.TEXT]):
         logger.debug("pdf, CSV or TEXT file format")
-        return {"result": ai_model.get_query_results(AI_API_KEY, request.prompt, request.history, request.session_id)}
+        output, agent_thoughts = ai_model.get_query_results(AI_API_KEY, request.prompt, request.history, request.session_id)
+        return {
+            "result": output,
+            "agent_thoughts": agent_thoughts}
     
     else:
        raise HTTPException(status_code=400, detail="Invalid file type")
@@ -97,7 +103,10 @@ def query_sheet_model(request: schema.PredictSheetReq, AI_API_KEY):
             temp_file_path = temp_file.name
             df = pd.read_csv(temp_file_path)
 
-        return {"result": ai_model.get_sheet_query_results(AI_API_KEY, df, request.prompt)}
+        output, agent_thoughts = ai_model.get_sheet_query_results(AI_API_KEY, df, request.prompt)
+        return {
+            "result": output,
+            "agent_thoughts": agent_thoughts}
 
     elif(request.data_type in [DataType.EXCEL]):
         with NamedTemporaryFile(delete=True) as temp_file:
@@ -106,7 +115,11 @@ def query_sheet_model(request: schema.PredictSheetReq, AI_API_KEY):
             temp_file_path = temp_file.name
             df = pd.read_excel(temp_file_path)
 
-        return {"result": ai_model.get_sheet_query_results(AI_API_KEY, df, request.prompt)}
+        output, agent_thoughts = ai_model.get_sheet_query_results(AI_API_KEY, df, request.prompt)
+        return {
+            "result": output,
+            "agent_thoughts": agent_thoughts}
+
     else:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
