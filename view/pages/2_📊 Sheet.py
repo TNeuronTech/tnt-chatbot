@@ -73,7 +73,7 @@ else:
                             uploaded_file,
                             data_type)
             if result['status']:
-                csv_agent.update_chat_history(query, result['data'['result']])
+                csv_agent.update_chat_history(query, result['data']['result'])
                 csv_agent.display_chat_history()
             else:
                 st.error(f"Error: {result['data']['detail']}")
