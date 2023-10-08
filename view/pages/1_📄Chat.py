@@ -89,9 +89,6 @@ else:
                     if is_ready:
                         # Update the chat history and display the chat messages
                         history.append("user", user_input)
-                        
-                        old_stdout = sys.stdout
-                        sys.stdout = captured_output = StringIO()
 
                         result = restClient.predict(
                             user_api_key,
@@ -99,21 +96,14 @@ else:
                             user_input,
                             st.session_state["history"], data_type)
                         
-                        sys.stdout = old_stdout
-
                         if result['status']:
                             history.append("assistant", result['data']['result'])
 
                             st.session_state["history"].append((user_input, result['data']['result']))
 
-                            # Clean up the agent's thoughts to remove unwanted characters
-                            thoughts = captured_output.getvalue()
-                            cleaned_thoughts = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', thoughts)
-                            cleaned_thoughts = re.sub(r'\[1m>', '', cleaned_thoughts)
-
                             # Display the agent's thoughts
                             with st.expander("Display the agent's thoughts"):
-                                st.write(cleaned_thoughts)
+                                st.write(result['data']['agent_thoughts'])
                         else:
                             st.error(f"Error: {result['data']['detail']}")
                         
