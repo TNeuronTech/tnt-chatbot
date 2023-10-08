@@ -18,6 +18,8 @@ from tntchatbot.utils import common
 
 from langchain.document_loaders import PyPDFLoader, CSVLoader, TextLoader
 
+from fastapi import HTTPException
+
 
 def query_model(request: schema.PredictReq, AI_API_KEY):
     
@@ -30,8 +32,7 @@ def query_model(request: schema.PredictReq, AI_API_KEY):
         return {"result": ai_model.get_query_results(AI_API_KEY, request.prompt, request.history, request.session_id)}
     
     else:
-        pass
-        # TODO: send error response
+       raise HTTPException(status_code=400, detail="Invalid file type")
 
 
 def train_model(request: schema.TrainReq, AI_API_KEY):
@@ -83,8 +84,8 @@ def train_model(request: schema.TrainReq, AI_API_KEY):
         return {"key": key}
         
     else:
-        pass
-        # TODO: send error response
+        raise HTTPException(status_code=400, detail="Invalid file type")
+
 
 def query_sheet_model(request: schema.PredictSheetReq, AI_API_KEY):
     
@@ -107,7 +108,6 @@ def query_sheet_model(request: schema.PredictSheetReq, AI_API_KEY):
 
         return {"result": ai_model.get_sheet_query_results(AI_API_KEY, df, request.prompt)}
     else:
-        pass
-        # TODO: send error response
+        raise HTTPException(status_code=400, detail="Invalid file type")
 
     

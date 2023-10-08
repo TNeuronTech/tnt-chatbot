@@ -49,9 +49,13 @@ else:
         if video_id != "":
             
             with st.spinner("Processing..."):
-                answer = restClient.summerize_video(
+                result = restClient.summerize_video(
                     user_api_key,
                     video_id,
                     DataType.VIDEO)
 
-            st.subheader(answer)
+            if result['status']:
+                st.subheader(result['data']['result'])
+            else:
+                st.error(f"Error: {result['data']['detail']}")
+            

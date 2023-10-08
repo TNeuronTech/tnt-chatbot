@@ -67,14 +67,17 @@ else:
             if reset_chat_button:
                 st.session_state["chat_history"] = []
         if submitted_query:
-            output = restClient.predict_sheet(
+            result = restClient.predict_sheet(
                             user_api_key,
                             query,
                             uploaded_file,
                             data_type)
-
-            csv_agent.update_chat_history(query, output)
-            csv_agent.display_chat_history()
+            if result['status']:
+                csv_agent.update_chat_history(query, result['data'['result']])
+                csv_agent.display_chat_history()
+            else:
+                st.error(f"Error: {result['data']['detail']}")
+            
         if st.session_state.df is not None:
             st.subheader("Current dataframe:")
             st.write(st.session_state.df)

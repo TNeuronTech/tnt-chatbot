@@ -52,14 +52,21 @@ else:
             st.session_state["datafile"] = uploaded_file.name
             # finetune with new data
             with st.spinner("Processing..."):
-                st.session_state["session_id"] = restClient.train(
+                result = restClient.train(
                     user_api_key,
                     uploaded_file,
                     data_type)
+            
+            if result['status']:
+                st.session_state["session_id"] = result['data']['key']
+            else:
+                st.error(f"Error: {result['data']['detail']}")
+                st.session_state['session_id'] = None
+                
+            st.session_state["ready"] = result['status']
             print(f"Session id: {st.session_state['session_id']}")
-        st.session_state["ready"] = True
+        
 
-    
         # Initialize chat history
         history = ChatHistory()
         try:
@@ -86,7 +93,7 @@ else:
                         old_stdout = sys.stdout
                         sys.stdout = captured_output = StringIO()
 
-                        output = restClient.predict(
+                        result = restClient.predict(
                             user_api_key,
                             str(st.session_state["session_id"]),
                             user_input,
@@ -94,18 +101,22 @@ else:
                         
                         sys.stdout = old_stdout
 
-                        history.append("assistant", output)
+                        if result['status']:
+                            history.append("assistant", result['data']['result'])
 
-                        st.session_state["history"].append((user_input, output))
+                            st.session_state["history"].append((user_input, result['data']['result']))
 
-                        # Clean up the agent's thoughts to remove unwanted characters
-                        thoughts = captured_output.getvalue()
-                        cleaned_thoughts = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', thoughts)
-                        cleaned_thoughts = re.sub(r'\[1m>', '', cleaned_thoughts)
+                            # Clean up the agent's thoughts to remove unwanted characters
+                            thoughts = captured_output.getvalue()
+                            cleaned_thoughts = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', thoughts)
+                            cleaned_thoughts = re.sub(r'\[1m>', '', cleaned_thoughts)
 
-                        # Display the agent's thoughts
-                        with st.expander("Display the agent's thoughts"):
-                            st.write(cleaned_thoughts)
+                            # Display the agent's thoughts
+                            with st.expander("Display the agent's thoughts"):
+                                st.write(cleaned_thoughts)
+                        else:
+                            st.error(f"Error: {result['data']['detail']}")
+                        
 
                 history.generate_messages(response_container)
         except Exception as e:
